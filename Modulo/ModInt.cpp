@@ -2,6 +2,11 @@
 
 class ModInt {
 public:
+    ModInt() 
+      : val(0), mod(0) 
+    {
+    }
+
     ModInt(int64_t v, int64_t m) 
       : val(v % m), mod(m)
     {
@@ -100,15 +105,21 @@ ModInt modpow(int64_t a, int64_t n, int64_t mod) {
     return ret;
 }
 
-ModInt modconb(int64_t n, int64_t k, int64_t mod) {
-    ModInt nu(1, mod);
-    ModInt de(1, mod);
+ModInt modfact(int64_t n, int64_t mod) {
+    static std::vector<ModInt> facts;
+    if (n < (int64_t)(facts.size())) {
+        return facts[n];
+    } else {
+        const int64_t org_size = facts.size();
+        facts.resize(n + 1);
+        for (int64_t i = org_size; i <= n; ++i) {
+            facts[i] = ((i == 0) ? ModInt(1, mod) : facts[i-1] * ModInt(i, mod));
+        }
 
-    for (int64_t i = 0; i < k; ++i) {
-        nu *= ModInt(n-i, mod);
-        de *= ModInt(i+1, mod);
+        return facts[n];
     }
-
-    return nu / de;
 }
 
+ModInt modconb(int64_t n, int64_t k, int64_t mod) {
+    return modfact(n, mod) / (modfact(n-k, mod) * modfact(k, mod));
+}
